@@ -20,4 +20,6 @@ $ python manage.py runserver
 
 To make your code ready for PEP8 coding style, use [autopep8](https://github.com/hhatto/autopep8) along with following command-
 
-```autopep8 --in-place --aggressive --aggressive <filename>```
+```
+autopep8 --in-place --aggressive --aggressive <filename>
+```
