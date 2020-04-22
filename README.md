@@ -17,3 +17,7 @@ $ python manage.py runserver
 
 # Load the site at http://127.0.0.1:8000
 ```
+
+To make your code ready for PEP8 coding style, use [autopep8](https://github.com/hhatto/autopep8) along with following command-
+
+```autopep8 --in-place --aggressive --aggressive <filename>```
