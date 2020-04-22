@@ -1,26 +1,26 @@
 from django.db import models
-from django.core.exceptions import ValidationError
-from django.db.models.signals import pre_save
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 # read-more, creating a custom user model manager
 # https://docs.djangoproject.com/en/3.0/topics/auth/customizing/#a-full-example
+
+
 class CustomUserManager(BaseUserManager):
-    def create_user(self, email, password, name,**extra_fields):
+    def create_user(self, email, password, name, **extra_fields):
         """Create and saves a new user"""
         if not email:
             raise ValueError("Please Enter a valid email")
         if not password:
             raise ValueError("Please enter a valid password")
-        user= self.model(
-            email=self.normalize_email(email), 
+        user = self.model(
+            email=self.normalize_email(email),
             name=name,
             **extra_fields
-            )
+        )
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, password, name,**extra_fields):
+    def create_superuser(self, email, password, name, **extra_fields):
         """Create and saves a new super user"""
         user = self.create_user(
             email=email,
@@ -32,8 +32,8 @@ class CustomUserManager(BaseUserManager):
         user.staff = True
         user.save(using=self._db)
         return user
-    
-    def create_staffuser(self, email, password, name,**extra_fields):
+
+    def create_staffuser(self, email, password, name, **extra_fields):
         """Create and saves a new staff user"""
         user = self.create_user(
             email=email,
@@ -48,6 +48,8 @@ class CustomUserManager(BaseUserManager):
 # read-more
 # https://docs.djangoproject.com/en/3.0/topics/auth/customizing/#specifying-a-custom-user-model
 # creating a custom user model
+
+
 class User(AbstractBaseUser):
     """ Custom user model support email as username"""
     name = models.CharField(max_length=30)
@@ -56,7 +58,7 @@ class User(AbstractBaseUser):
     staff = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
 
-    USERNAME_FIELD = 'email' #used as the username, i.e., login 
+    USERNAME_FIELD = 'email'  # used as the username, i.e., login
     REQUIRED_FIELDS = ['name']
 
     objects = CustomUserManager()
@@ -81,7 +83,7 @@ class User(AbstractBaseUser):
     @property
     def is_staff(self):
         return self.staff
-    
+
     @property
     def is_admin(self):
         return self.admin

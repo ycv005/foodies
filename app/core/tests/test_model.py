@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 
+
 class UserTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -10,12 +11,12 @@ class UserTestCase(TestCase):
 
     def test_user_create_with_email(self):
         """Testing a user is created with email"""
-        user  = get_user_model().objects.create_user(
+        user = get_user_model().objects.create_user(
             email=self.email,
             password=self.password,
             name=self.name
         )
-        self.assertEqual(self.email,user.email)
+        self.assertEqual(self.email, user.email)
         self.assertTrue(user.check_password(self.password))
         self.assertFalse(user.admin)
         self.assertFalse(user.staff)
@@ -23,7 +24,9 @@ class UserTestCase(TestCase):
     def test_new_user_invalid_email(self):
         """Test user with invalid email"""
         with self.assertRaises(ValueError):
-            get_user_model().objects.create_user(None,self.password,self.name)
+            get_user_model().objects.create_user(
+                None, self.password, self.name
+            )
 
     def test_new_super_user(self):
         """Test creating a new superuser"""
