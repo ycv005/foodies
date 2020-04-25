@@ -1,5 +1,7 @@
 # Foodies
 
+Developed using Test-Driven-Development and [Docker](https://docs.docker.com/compose/django/)
+
 ### 📖 Install
 
 ```
@@ -22,4 +24,10 @@ To make your code ready for PEP8 coding style, use [autopep8](https://github.com
 
 ```
 autopep8 --in-place --aggressive --aggressive <filename>
+```
+
+Test your code against all unit test and flake8-
+
+```
+docker-compose run --rm app sh -c "python manage.py test && flake8"
 ```

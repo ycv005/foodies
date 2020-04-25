@@ -7,6 +7,7 @@ from rest_framework import status
 
 CREATE_USER_URL = reverse('user:create')
 TOKEN_URL = reverse('user:token')
+PROFILE_URL = reverse('user:update')
 
 
 class PublicUserApiTest(TestCase):
@@ -71,3 +72,47 @@ class PublicUserApiTest(TestCase):
         res = self.client.post(TOKEN_URL, self.credential)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertNotIn('token', res.data)
+
+    def test_retrieve_user_unauthorized(self):
+        """Test that authentication is required for users"""
+        res = self.client.get(PROFILE_URL)
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class PrivateUserApiTest(TestCase):
+    """Test API request that require authentication"""
+
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            email="ycv005@gmail.com",
+            name="yash",
+            password="@P1q2w3e4r"
+        )
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+    def test_get_user_profile(self):
+        """Test to get user profile when user authenticated"""
+        res = self.client.get(PROFILE_URL)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data, {
+            'name': self.user.name,
+            'email': self.user.email
+        })
+
+    def test_post_not_allowed_on_profile(self):
+        """Test that profile page don't allow post method"""
+        res = self.client.post(PROFILE_URL, {})
+        self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_user_update_profile(self):
+        """Test updating profile is done successfully"""
+        data = {
+            'name': "new name",
+            'password': "newpassword"
+        }
+        res = self.client.patch(PROFILE_URL, data)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.user.refresh_from_db()
+        self.assertEqual(data['name'], self.user.name)
+        self.assertTrue(self.user.check_password(data['password']))
