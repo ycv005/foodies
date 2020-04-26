@@ -47,11 +47,12 @@ class PrivateTagApiTest(TestCase):
     """Tesst the authorized user tags"""
     @classmethod
     def setUpTestData(self):
-        self.user = get_user_model().objects.create_user(
-            email="test@gmail.com",
-            name="test",
-            password="testpassword"
-        )
+        self.crenditial = {
+            "email": "test@gmail.com",
+            "name": "test",
+            "password": "testpassword"
+        }
+        self.user = get_user_model().objects.create_user(**self.crenditial)
         self.TAG_URL = reverse('recipe:tag-list')
 
     def setUp(self):
@@ -84,3 +85,24 @@ class PrivateTagApiTest(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res.data), 1)
         self.assertEqual(res.data[0]['name'], tag.name)
+
+    def test_create_tag_successfully(self):
+        """Test that a tag is created successfully"""
+        data = {"name": "sometag"}
+        self.client.post(
+            self.TAG_URL,
+            data
+        )
+        tag_exist = Tag.objects.filter(
+            user=self.user,
+            name=data['name']
+        ).exists()
+        self.assertTrue(tag_exist)
+
+    def test_create_tag_invalid(self):
+        """Test create new invalid tag"""
+        res = self.client.post(
+            self.TAG_URL,
+            {"name": ""}
+        )
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
