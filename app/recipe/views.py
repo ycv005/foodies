@@ -38,3 +38,7 @@ class IngredientViewSet(mixins.CreateModelMixin,
     def get_queryset(self):
         queryset = Ingredient.objects.filter(user=self.request.user)
         return queryset
+
+    def perform_create(self, serializers):
+        """creating ingredient object pass extra(user) data as well"""
+        serializers.save(user=self.request.user)
