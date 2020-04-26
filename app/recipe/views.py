@@ -2,8 +2,8 @@ from django.shortcuts import render
 from rest_framework import viewsets, mixins
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from .serializers import TagSerializer, IngredientSerializer
-from .models import Tag, Ingredient
+from .serializers import TagSerializer, IngredientSerializer, RecipeSerializer
+from .models import Tag, Ingredient, Recipe
 
 
 class BaseRecipeAttrViewSet(viewsets.GenericViewSet,
@@ -32,3 +32,15 @@ class IngredientViewSet(BaseRecipeAttrViewSet):
     """Class to manipulate the ingredient objects"""
     serializer_class = IngredientSerializer
     queryset = Ingredient.objects.all()
+
+
+class RecipeViewSet(viewsets.ModelViewSet):
+    """Class to manipulate the recipe objects"""
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+    queryset = Recipe.objects.all()
+    serializer_class = RecipeSerializer
+
+    def get_queryset(self):
+        """return user related objects"""
+        return self.queryset.filter(user=self.request.user)

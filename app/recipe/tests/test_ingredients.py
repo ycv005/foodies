@@ -8,6 +8,7 @@ from recipe.serializers import IngredientSerializer
 
 
 INGREDIENT_URL = reverse('recipe:ingredient-list')
+
 TEST_CREDENTIAL = {
     "email": "test@gmail.com",
     "name": "test",
