@@ -7,27 +7,6 @@ from rest_framework.test import APIClient
 from recipe.serializers import TagSerializer
 
 
-class TagModelTest(TestCase):
-    """Test case for the tag model"""
-    @classmethod
-    def setUpTestData(cls):
-        """Test data for each test method defined below"""
-        cls.user = get_user_model().objects.create_user(
-            email="test@gmaill.com",
-            name="test",
-            password="testpassword"
-        )
-
-    def test_tag_create_successfull(self):
-        """Test that tag are created successfully"""
-        tag = Tag.objects.create(
-            name="taghere",
-            user=self.user
-        )
-        self.assertEqual(str(tag), tag.name)
-        self.assertEqual(self.user.id, tag.user.id)
-
-
 class PublicTagApiTest(TestCase):
     """Test case for the publicily available tag api"""
     @classmethod
@@ -65,7 +44,7 @@ class PrivateTagApiTest(TestCase):
         Tag.objects.create(user=self.user, name="sometags")
 
         res = self.client.get(self.TAG_URL)
-        tags = Tag.objects.all().order_by('-name')
+        tags = Tag.objects.all()
         serializer = TagSerializer(tags, many=True)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)

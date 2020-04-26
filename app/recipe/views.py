@@ -2,8 +2,8 @@ from django.shortcuts import render
 from rest_framework import viewsets, mixins
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from .serializers import TagSerializer
-from .models import Tag
+from .serializers import TagSerializer, IngredientSerializer
+from .models import Tag, Ingredient
 
 
 class TagListViewSet(mixins.CreateModelMixin,
@@ -18,9 +18,23 @@ class TagListViewSet(mixins.CreateModelMixin,
     def get_queryset(self):
         queryset = Tag.objects.filter(
             user__id=self.request.user.id
-        ).order_by('-name')
+        )
         return queryset
 
     def perform_create(self, serializers):
         """Create a new tag"""
         serializers.save(user=self.request.user)
+
+
+class IngredientViewSet(mixins.CreateModelMixin,
+                        mixins.ListModelMixin,
+                        viewsets.GenericViewSet):
+    """Class to manipulate the ingredient objects"""
+    serializer_class = IngredientSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+    queryset = Ingredient.objects.all()
+
+    def get_queryset(self):
+        queryset = Ingredient.objects.filter(user=self.request.user)
+        return queryset
