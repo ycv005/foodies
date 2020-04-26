@@ -6,39 +6,29 @@ from .serializers import TagSerializer, IngredientSerializer
 from .models import Tag, Ingredient
 
 
-class TagListViewSet(mixins.CreateModelMixin,
-                     mixins.ListModelMixin,
-                     viewsets.GenericViewSet):
+class BaseRecipeAttrViewSet(viewsets.GenericViewSet,
+                            mixins.ListModelMixin,
+                            mixins.CreateModelMixin):
+    """Base viewset for user owned recipe attribute"""
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def get_queryset(self):
+        """return user related objects"""
+        return self.queryset.filter(user=self.request.user)
+
+    def perform_create(self, serializers):
+        """creating object pass extra(user) data as well"""
+        serializers.save(user=self.request.user)
+
+
+class TagListViewSet(BaseRecipeAttrViewSet):
     """Class for the showing tag list"""
     serializer_class = TagSerializer
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
     queryset = Tag.objects.all()
 
-    def get_queryset(self):
-        queryset = Tag.objects.filter(
-            user__id=self.request.user.id
-        )
-        return queryset
 
-    def perform_create(self, serializers):
-        """Create a new tag"""
-        serializers.save(user=self.request.user)
-
-
-class IngredientViewSet(mixins.CreateModelMixin,
-                        mixins.ListModelMixin,
-                        viewsets.GenericViewSet):
+class IngredientViewSet(BaseRecipeAttrViewSet):
     """Class to manipulate the ingredient objects"""
     serializer_class = IngredientSerializer
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
     queryset = Ingredient.objects.all()
-
-    def get_queryset(self):
-        queryset = Ingredient.objects.filter(user=self.request.user)
-        return queryset
-
-    def perform_create(self, serializers):
-        """creating ingredient object pass extra(user) data as well"""
-        serializers.save(user=self.request.user)
