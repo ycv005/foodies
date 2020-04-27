@@ -49,7 +49,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """return user related objects"""
-        return self.queryset.filter(user=self.request.user)
+        tags = self.request.query_params.get('tags')
+        ingredients = self.request.query_params.get('ingredients')
+        queryset = self.queryset
+        if tags:
+            tags_id = [int(i) for i in tags.split(',')]
+            queryset = queryset.filter(tags__id__in=tags_id)
+        if ingredients:
+            ingredients_id = [int(i) for i in ingredients.split(',')]
+            queryset = queryset.filter(ingredients__id__in=ingredients_id)
+        return queryset.filter(user=self.request.user)
 
     def perform_create(self, serializer):
         """Create a new recipe"""
