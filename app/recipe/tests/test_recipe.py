@@ -1,9 +1,10 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from recipe.models import Recipe, Tag, Ingredient
+from recipe.models import Recipe, Tag, Ingredient, recipe_image_file_path
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
+from unittest.mock import patch
 from recipe.serializers import RecipeSerializer, RecipeDetailSerializer
 
 RECIPE_URL = reverse('recipe:recipe-list')
@@ -149,3 +150,40 @@ class PrivateRecipeApiTest(TestCase):
         ingredients = recipe.ingredients.all()
         self.assertIn(ingredient, ingredients)
         self.assertIn(ingredient1, ingredients)
+
+    def test_partially_update_recipe(self):
+        """Test updating a recipe with patch"""
+        recipe = sample_recipe(self.user)
+        recipe.tags.add(sample_tag(self.user, "south indian"))
+        new_tag = sample_tag(self.user, "american")
+        data = {'name': 'Butter chicken', 'tags': [new_tag.id]}
+
+        self.client.patch(recipe_detail_url(recipe.id), data)
+        recipe.refresh_from_db()
+        self.assertEqual(recipe.name, data['name'])
+        self.assertIn(new_tag, recipe.tags.all())
+        self.assertEqual(1, len(recipe.tags.all()))
+
+    def test_update_recipe(self):
+        """Test updating a recipe with put"""
+        recipe = sample_recipe(self.user)
+        recipe.tags.add(sample_tag(self.user, "south indian"))
+        data = SAMPLE_RECIPE.copy()
+        data['title'] = 'Chicken punjabi'
+        data['price'] = 180
+        self.client.put(recipe_detail_url(recipe.id), data)
+        recipe.refresh_from_db()
+        self.assertEqual(data['price'], recipe.price)
+        self.assertEqual(data['name'], recipe.name)
+        #  all tags would be removed since not provided
+        self.assertEqual(len(recipe.tags.all()), 0)
+
+    @patch('uuid.uuid4')
+    def test_recipe_file_name_uuid(self, mock_uuid):
+        """Test that image saved in right location"""
+        uuid = 'test-uuid'
+        mock_uuid.return_value = uuid
+        file_path = recipe_image_file_path(None, 'myimage.jpeg')
+
+        exp_path = f'uploads/recipe/{uuid}.jpeg'
+        self.assertEqual(file_path, exp_path)

@@ -1,5 +1,14 @@
 from django.db import models
 from django.conf import settings
+import os
+import uuid
+
+
+def recipe_image_file_path(instance, filename):
+    """Generate file path for the image file"""
+    ext = filename.split('.')[-1]
+    filename = f'{uuid.uuid4()}.{ext}'
+    return "uploads/recipe/" + filename
 
 
 class Tag(models.Model):
@@ -44,6 +53,9 @@ class Recipe(models.Model):
     url = models.CharField(max_length=255, blank=True)
     ingredients = models.ManyToManyField(Ingredient)
     tags = models.ManyToManyField(Tag)
+    image = models.ImageField(
+        null=True, blank=True, upload_to=recipe_image_file_path
+    )
 
     class Meta:
         ordering = ['id']
