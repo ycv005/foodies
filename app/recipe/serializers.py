@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import Tag, Ingredient, Recipe
 
 
-class TagSerializer(serializers.HyperlinkedModelSerializer):
+class TagSerializer(serializers.ModelSerializer):
     """Serializer for Tag objects"""
     class Meta:
         model = Tag
@@ -10,7 +10,7 @@ class TagSerializer(serializers.HyperlinkedModelSerializer):
         read_only_fields = ['id']
 
 
-class IngredientSerializer(serializers.HyperlinkedModelSerializer):
+class IngredientSerializer(serializers.ModelSerializer):
     """Serializer for the ingredient"""
     class Meta:
         model = Ingredient
@@ -31,5 +31,14 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = '__all__'
+        fields = (
+            'id', 'name', 'ingredients', 'tags', 'time_took_min',
+            'price', 'url'
+        )
         read_only_fields = ['id']
+
+
+class RecipeDetailSerializer(RecipeSerializer):
+    """Serialize the recipe detail"""
+    ingredients = IngredientSerializer(many=True, read_only=True)
+    tags = TagSerializer(many=True, read_only=True)
